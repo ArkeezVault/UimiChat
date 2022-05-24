@@ -50,10 +50,10 @@
         margin: 0;
         padding: 0;
       }
-      #messages > li {
+      #messages > div {
         padding: 0.5rem 1rem;
       }
-      #messages > li:nth-child(odd) {
+      #messages > div:nth-child(odd) {
         background: #efefef;
       }
     </style>
@@ -72,7 +72,6 @@
       var messages = document.getElementById("messages");
       var form = document.getElementById("form");
       var input = document.getElementById("input");
-      var randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -83,17 +82,42 @@
       });
 
       socket.on("chat message", function (msg) {
-        var item = document.createElement("li");
-        item.textContent = msg;
-        messages.appendChild(item);
+        let msgs = Array.from(messages.querySelectorAll("div"));
+
+        let last_msg =
+          msgs[msgs.length - 1] &&
+          msgs[msgs.length - 1].querySelector("h4").innerText;
+
+        if (!last_msg) {
+          var item = document.createElement("div");
+          item.innerHTML = `
+            <h4>${msg.username}</h4>
+            <p>${msg.msg}</p>
+          `;
+          messages.appendChild(item);
+        } else {
+          if (last_msg == msg.username) {
+            let p = document.createElement("p");
+            p.innerText = msg.msg;
+            msgs[msgs.length - 1].appendChild(p);
+          } else {
+            var item = document.createElement("div");
+            item.innerHTML = `
+            <h4>${msg.username}</h4>
+            <p>${msg.msg}</p>
+          `;
+            messages.appendChild(item);
+          }
+        }
+
         window.scrollTo(0, document.body.scrollHeight);
       });
 
       socket.on("joined", function (msg) {
+        console.log(msg);
         var item = document.createElement("small");
-        item.textContent = msg;
+        item.textContent = msg.msg;
         item.style.display = "block";
-        item.style.color = `#${randomColor}`;
         item.style.fontWeight = "bold";
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);

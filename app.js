@@ -19,27 +19,26 @@ fastify.get("/", function (request, reply) {
 fastify.ready((err) => {
   if (err) throw err;
 
-  const setUsernames = async (sockets) => {
-    for (let index = 0; index < sockets.length; index++) {
-      const element = sockets[index];
-      element.data.username = `Stranger ${index + 1}`;
-    }
-  };
+  var randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
   io.on("connection", async (socket) => {
     const sockets = await io.fetchSockets();
+    socket.data.username = socket.id.slice(-4).toUpperCase();
 
-    setUsernames(sockets);
-
-    io.emit("joined", `${socket.data.username} joined the chat!`);
+    io.emit("joined", {
+      username: socket.data.username,
+      msg: `${socket.data.username} joined the chat!`,
+    });
 
     socket.on("chat message", (msg) => {
-      io.emit("chat message", msg);
+      io.emit("chat message", {
+        username: socket.data.username,
+        msg,
+      });
     });
 
     socket.on("disconnect", () => {
-      io.emit("left", "user left chat");
-      setUsernames(sockets);
+      io.emit("left", `${socket.data.username}  left chat`);
     });
   });
 });
