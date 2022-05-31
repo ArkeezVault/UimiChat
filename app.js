@@ -4,7 +4,17 @@ const fastify = require("fastify")({
 
 const path = require("path");
 const { Server } = require("socket.io");
-const io = new Server(fastify.server);
+const io = new Server(fastify.server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+fastify.register(require("@fastify/cors"), {
+  origin: "*",
+  methods: "*",
+  allowedHeaders: ["Content-Type", "Authorization"],
+});
 
 fastify.register(require("@fastify/static"), {
   root: path.join(__dirname, "public"),
@@ -22,6 +32,7 @@ fastify.ready((err) => {
   var randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
   io.on("connection", async (socket) => {
+    console.log("socket connected!");
     const sockets = await io.fetchSockets();
     socket.data.username = socket.id.slice(-4).toUpperCase();
 
@@ -45,7 +56,7 @@ fastify.ready((err) => {
 
 const start = async () => {
   try {
-    await fastify.listen(4000);
+    await fastify.listen(4000, "192.168.1.12");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
