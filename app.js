@@ -56,7 +56,7 @@ fastify.ready((err) => {
 
 const start = async () => {
   try {
-    await fastify.listen(4000, "192.168.1.12");
+    await fastify.listen(4000);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
