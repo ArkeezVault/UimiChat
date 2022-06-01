@@ -6,7 +6,7 @@ const path = require("path");
 const { Server } = require("socket.io");
 const io = new Server(fastify.server, {
   cors: {
-    origin: "*",
+    origin: "*:*",
   },
 });
 
